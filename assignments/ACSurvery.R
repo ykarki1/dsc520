@@ -38,3 +38,4 @@ plot = ggplot(acs_df, aes(HSDegree)) +
 plot
 
 probplot(HSDegree)
+
