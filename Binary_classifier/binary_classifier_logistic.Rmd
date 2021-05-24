@@ -1,0 +1,69 @@
+---
+title: "Binary classifier regression model"
+author: "Yograj Karki"
+date: "5/19/2021"
+output:
+  pdf_document: default
+  word_document: default
+---
+
+# Loading libraries
+```{r warning = F}
+library(caTools)
+```
+
+
+# Loading the dataset
+Here I created csv file by copying the contents from the arff file, and then fixed the attributes of certain columns.
+```{r}
+setwd("~/MSDS/DSC520/dsc520/Binary_classifier")
+
+data <- read.csv("binary-classifier-data.csv")
+str(data)
+```
+
+# Splitting the data into train and test datasets
+```{r}
+# Splitting the data into train and test with the 80:20 ratio
+dt = sort(sample(nrow(data), nrow(data)*0.8))
+
+# Training dataset
+train<-data[dt,]
+
+# Testing dataset
+test<-data[-dt,]
+```
+
+
+# Fitting the data to a logistic regression model
+
+Here I used the glm() function to fit the model and the method was binomial logistic regression. 
+```{r}
+# fitting the model
+logistic <- glm(label ~ x+y, data = train, family="binomial")
+
+# summary of the model
+summary(logistic)
+```
+
+
+# Checking the accuracy of the model
+Running the test data throught the model
+```{r echo = TRUE}
+res <- predict(logistic, test, type="response")
+res
+```
+
+# Confusion matrix
+```{r}
+confmatrix <- table(Actual_value = test$label, Predicted_value = res >0.5)
+confmatrix
+```
+
+# Accuracy percentage
+```{r}
+#calculating accuracy percentage
+(confmatrix[[1]]+confmatrix[[2]])/sum(confmatrix)
+```
+Our model turned out to be only 52% accurate.
+
