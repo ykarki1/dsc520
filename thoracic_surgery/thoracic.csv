@@ -1,23 +1,4 @@
-@relation 'Thoracic_Surgery_Data'
-@attribute DGN {DGN3,DGN2,DGN4,DGN6,DGN5,DGN8,DGN1}
-@attribute PRE4 numeric
-@attribute PRE5 numeric
-@attribute PRE6 {PRZ2,PRZ1,PRZ0}
-@attribute PRE7 {T,F}
-@attribute PRE8 {T,F}
-@attribute PRE9 {T,F}
-@attribute PRE10 {T,F}
-@attribute PRE11 {T,F}
-@attribute PRE14 {OC11,OC14,OC12,OC13}
-@attribute PRE17 {T,F}
-@attribute PRE19 {T,F}
-@attribute PRE25 {T,F}
-@attribute PRE30 {T,F}
-@attribute PRE32 {T,F}
-@attribute AGE numeric
-@attribute Risk1Yr {T,F}
-
-@data
+DGN,PRE4,PRE5,PRE6,PRE7,PRE8,PRE9,PRE10,PRE11,PRE14,PRE17,PRE19,PRE25,PRE30,PRE32,AGE,Risk1Yr
 DGN2,2.88,2.16,PRZ1,F,F,F,T,T,OC14,F,F,F,T,F,60,F
 DGN3,3.4,1.88,PRZ0,F,F,F,F,F,OC12,F,F,F,T,F,51,F
 DGN3,2.76,2.08,PRZ1,F,F,F,T,F,OC11,F,F,F,T,F,59,F
