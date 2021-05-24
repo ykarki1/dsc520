@@ -1,0 +1,118 @@
+---
+title: "Final project Step 2"
+author: "Yograj Karki"
+date: "5/21/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+In this step, I've started to import libraries and data. I'll be looking at the data with str() function and also will be seeing the first few rows by head() function. Later on, I'll be creating the matrices of genres of movies so that the recommenderlab could work with the data.
+
+# Importing libraries
+```{r message= F, warning= F, echo= F}
+library(recommenderlab)
+library(ggplot2)
+library(reshape2)
+library(data.table)
+```
+
+
+# Importing the dataset
+```{r}
+setwd("~/MSDS/DSC520/dsc520/Final_project")
+movie_data <- read.csv("IMDB-Dataset/movies.csv", stringsAsFactors=FALSE)
+rating_data <- read.csv("IMDB-Dataset/ratings.csv")
+str(movie_data)
+```
+
+# Glimpse of the data
+```{r}
+# Movies data
+head(movie_data)
+```
+```{r}
+# Ratings data
+head(rating_data)
+```
+```{r}
+# extracting the genres as a dataframe
+movie_genre <- as.data.frame(movie_data$genres, stringsAsFactors=FALSE)
+
+# Splitting the collective genres into individual ones
+movie_genre2 <- as.data.frame(tstrsplit(movie_genre[,1], '[|]', type.convert=TRUE), stringsAsFactors=FALSE)
+
+# Assigning column names as serial numbers assuming each movie may have maximum of 10 genres
+colnames(movie_genre2) <- c(1:10)
+
+
+
+```
+```{r}
+# List of all the genres
+
+list_genre <- unique(movie_genre2[c("1")])[1:18,] # there was 19 values but last one was without genre so excluded that one
+
+#list_genre <- c("Action", "Adventure", "Animation", "Children", "Comedy",
+    #            "Crime","Documentary","Drama", "Fantasy", "Film-Noir",
+      #          "Horror","Musical", "Mystery","Romance","Sci-Fi", "Thriller", "War", "Western")
+
+# Initializing a matrix
+genre_mat1 <- matrix(0,10330,18)
+
+genre_mat1[1,] <- list_genre
+
+# Assigning genres  as column names
+colnames(genre_mat1) <- list_genre
+
+for (index in 1:nrow(movie_genre2)) {
+  for (col in 1:ncol(movie_genre2)) {
+    gen_col = which(genre_mat1[1,] == movie_genre2[index,col])
+    genre_mat1[index+1,gen_col] <- 1 }}
+
+
+genre_mat2 <- as.data.frame(genre_mat1[-1,], stringsAsFactors=FALSE) #removing first row, which was the genre list
+
+for (col in 1:ncol(genre_mat2)) {
+  genre_mat2[,col] <- as.integer(genre_mat2[,col]) #convert from characters to integers
+  }
+
+str(genre_mat2)
+```
+
+# Combining the genre matrix with the movies data resulting in a search matrix
+```{r}
+SearchMatrix <- cbind(movie_data[,1:2], genre_mat2[])
+head(SearchMatrix)
+
+```
+For the movie recommendation system to make sense of the ratings through recommenderlabs, we have to convert our matrix into a sparse matrix one. This new matrix is of the class ‘realRatingMatrix’.
+```{r}
+
+ratingMatrix <- reshape2::dcast(rating_data, userId~movieId, value.var = "rating", na.rm=FALSE)
+ratingMatrix <- as.matrix(ratingMatrix[,-1]) #remove userIds
+
+#Convert rating matrix into a recommenderlab sparse matrix
+ratingMatrix <- as(ratingMatrix, "realRatingMatrix")
+ratingMatrix
+```
+
+# Exploring recommendation model options
+```{r}
+recommendation_model <- recommenderRegistry$get_entries(dataType = "realRatingMatrix")
+names(recommendation_model)
+```
+
+Since we're interested to create the model based on IBCF algorithm or Item Based Collaborative filtering, let's look at the parameters for that.
+```{r}
+recommendation_model$IBCF_realRatingMatrix$parameters
+```
+
+So far, I have reached at this step,
+Next steps will be:
+- Creating visualizations of ratings and most watched movies etc.. I'll be exploring data as much as possible.
+- Then, I'll work on the recommender system based on Collaborative Filtering System. For that, I'll split the data in 80:20 ratio for - - training and testing purposes.
+- Train the model
+_ Make some predictions/recommendations
+- Validate the model
