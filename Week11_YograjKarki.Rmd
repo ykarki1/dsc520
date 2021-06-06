@@ -3,6 +3,7 @@ title: 'Week 11: Machine Learning'
 author: "Yograj Karki"
 date: "6/5/2021"
 output: pdf_document
+always_allow_html: true
 ---
 
 ```{r setup, include=FALSE}
@@ -67,7 +68,7 @@ random_trinary <- sample(1:nrow(trinary_df), 0.8*nrow(trinary_df))
 ```{r}
 #Binary
 train_binary <- binary_df[random_binary,]
-test_binary <- trinary_df[-random_binary,]
+test_binary <- binary_df[-random_binary,]
 #Trinary
 train_trinary <- trinary_df[random_trinary,] 
 test_trinary <- trinary_df[-random_trinary,] 
@@ -85,7 +86,7 @@ test_trinary_labels <-trinary_df[-random_trinary,1]
 ## Confusion matrix formula
 
 ```{r}
-# Formula for confusion matrix
+# Formula for Binary confusion matrix
 my.statistics <- function(Actual,Predicted) {
   confusion.table <- table(Actual=Actual,Predicted=Predicted)
   output <- list(confusion.table=confusion.table)
@@ -94,7 +95,7 @@ my.statistics <- function(Actual,Predicted) {
   FP <- confusion.table[3]
   TP <- confusion.table[4]
   output$accuracy <- (TP+TN)/sum(confusion.table)
-  output$precission <- (TP)/(TP+FP)
+  output$precision <- (TP)/(TP+FP)
   output$sensitivity <- (TP)/(TP+FN)
   output$specificity <- (TN)/(TN+FP)
   output$FPR <- (FP)/(TN+FP)
@@ -106,36 +107,100 @@ my.statistics <- function(Actual,Predicted) {
 
 ```{r}
 # k = 3 on Binary data
-knn_pred <- knn(train_binary[,c("x","y")], test_binary[,c("x", "y")], cl = train_binary$label, k = 50)
+knn_pred <- knn(train_binary[,c("x","y")],
+                test_binary[,c("x", "y")],
+                cl = train_binary$label, 
+                k = 15)
 
 # Accuracy
 my.statistics(test_binary$label, knn_pred)
 
 ```
 
-
+## k = 5
 ```{r}
-# Formula for accuracy
-# Initiating the loop
-val <- c(3,5,10,15,20,25)
-for (i in val){ 
-  knn_model <-  knn(train_binary[,c("x","y")], test_binary[,c("x", "y")], cl = train_binary$label, k = i)
-  
+# k = 5 on Binary data
+knn_pred <- knn(train_binary[,c("x","y")],
+                test_binary[,c("x", "y")],
+                cl = train_binary$label, 
+                k = 5)
 
+# Accuracy
+my.statistics(test_binary$label, knn_pred)$accuracy
 
-}
 ```
 
+## k = 10
 ```{r}
-i=3                         # declaration to initiate for loop
-k.optm=1   # declaration to initiate for loop
-val <- c(3,5,10,15,20,25)
-for (i in val){ 
-  knn.mod <-  knn(train=train_binary, test=test_binary, cl=train_binary_labels, k=i)
-  k.optm[i] <- 100 * sum(train_binary_labels == knn.mod)/NROW(train_binary_labels)
-  k=i  
-  cat(k,'=',k.optm[i],'\n')       # to print % accuracy 
-}
+# k = 10 on Binary data
+knn_pred <- knn(train_binary[,c("x","y")],
+                test_binary[,c("x", "y")],
+                cl = train_binary$label, 
+                k = 10)
+
+# Accuracy
+my.statistics(test_binary$label, knn_pred)$accuracy
+```
+
+## k = 15
+```{r}
+# k = 15 on Binary data
+knn_pred <- knn(train_binary[,c("x","y")],
+                test_binary[,c("x", "y")],
+                cl = train_binary$label, 
+                k = 15)
+
+# Accuracy
+my.statistics(test_binary$label, knn_pred)$accuracy
+```
+
+## k = 20
+```{r}
+# k = 20 on Binary data
+knn_pred <- knn(train_binary[,c("x","y")],
+                test_binary[,c("x", "y")],
+                cl = train_binary$label, 
+                k = 20)
+
+# Accuracy
+my.statistics(test_binary$label, knn_pred)$accuracy
+```
+
+## k = 25
+```{r}
+# k = 25 on Binary data
+knn_pred <- knn(train_binary[,c("x","y")],
+                test_binary[,c("x", "y")],
+                cl = train_binary$label, 
+                k = 25)
+
+# Accuracy
+my.statistics(test_binary$label, knn_pred)$accuracy
+```
+
+
+
+# KNN for Trinary classifier
+## k = 3
+```{r}
+knn_pred <- knn(train_trinary[, c("x", "y")],
+                test_trinary[,c("x","y")], 
+                cl = train_trinary$label,
+                k = 3)
+
+my.statistics(test_trinary$label, knn_pred)$accuracy
+
+```
+
+## k = 5
+```{r}
+knn_pred <- knn(train_trinary[, c("x", "y")],
+                test_trinary[,c("x","y")], 
+                cl = train_trinary$label,
+                k = 5)
+
+my.statistics(test_trinary$label, knn_pred)$accuracy
+
 ```
 
 
