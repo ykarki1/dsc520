@@ -10,14 +10,15 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # Loading packages and working directories
-```{r }
+```{r message= F, warning= F}
 #Packages
 library(ggplot2)
 library(plyr)
 library(dplyr)
 library(tidyverse)
 library(factoextra)
-library(cluster) 
+library(cluster)
+library(caret)
 library(class)
 
   setwd("~/MSDS/DSC520/dsc520")
@@ -27,6 +28,10 @@ library(class)
 ```{r}
 binary_df <- read.csv("data/binary-classifier-data.csv")
 trinary_df <- read.csv("data/trinary-classifier-data.csv")
+
+binary_df$label <- as.factor(binary_df$label)
+trinary_df$label <- as.factor(trinary_df$label)
+
 head(binary_df)
 head(trinary_df)
 ```
@@ -45,33 +50,20 @@ binary_df %>% ggvis(~x, ~y, fill = ~label) %>% layer_points()
 trinary_df %>% ggvis(~x, ~y, fill = ~label) %>% layer_points()
 
 ```
-```{r}
-library(kknn)
-```
 
 
-# For k nearest neighbors algorithm
+# k nearest neighbors algorithm
+## Data preparation
 ```{r}
 # Generate a random number that is 80% of the total number of rows in data set.
 set.seed(42)
 # Random sampling
 random_binary <- sample(1:nrow(binary_df), 0.8 * nrow(binary_df))
 random_trinary <- sample(1:nrow(trinary_df), 0.8*nrow(trinary_df))
-
-
-#the normalization function is created
-normalized <-function(x) { (x -min(x))/(max(x)-min(x)) }
 ```
 
-
-## Run normalization on 2 columns of dataset because they are the predictors
-```{r}
-binary_df_norm <- as.data.frame(lapply(binary_df[,c(2,3)], normalized))
-summary(binary_df_norm)
-```
 
 ## Splitting training and testing data
-
 ```{r}
 #Binary
 train_binary <- binary_df[random_binary,]
@@ -90,39 +82,46 @@ test_trinary_labels <-trinary_df[-random_trinary,1]
 
 ## Fit a k nearest neighbors’ model for each dataset for k=3, k=5, k=10, k=15, k=20, and k=25. Compute the accuracy of the resulting models for each value of k. Plot the results in a graph where the x-axis is the different values of k and the y-axis is the accuracy of the model.
 
-## Running a for-loop for each value of k
+## Confusion matrix formula
 
 ```{r}
-# k = 3
-knn_model_3 <- knn(train_binary, test_binary, cl = train_binary_labels, k = 3)
-acc_3 <- 100 * sum(test_binary_labels == knn_model_3)/NROW(test_binary_labels)
-acc_3
+# Formula for confusion matrix
+my.statistics <- function(Actual,Predicted) {
+  confusion.table <- table(Actual=Actual,Predicted=Predicted)
+  output <- list(confusion.table=confusion.table)
+  TN <- confusion.table[1]
+  FN <- confusion.table[2]
+  FP <- confusion.table[3]
+  TP <- confusion.table[4]
+  output$accuracy <- (TP+TN)/sum(confusion.table)
+  output$precission <- (TP)/(TP+FP)
+  output$sensitivity <- (TP)/(TP+FN)
+  output$specificity <- (TN)/(TN+FP)
+  output$FPR <- (FP)/(TN+FP)
+  
+  return(output)
+}
 ```
+
+
 ```{r}
+# k = 3 on Binary data
+knn_pred <- knn(train_binary[,c("x","y")], test_binary[,c("x", "y")], cl = train_binary$label, k = 50)
 
-confusionMatrix(table(knn_model_3, test_binary_labels))
+# Accuracy
+my.statistics(test_binary$label, knn_pred)
+
 ```
-
-
-
-
-
 
 
 ```{r}
 # Formula for accuracy
-accuracy <- function(x){
-    sum(diag(x)/(sum(rowSums(x))))*100
-}
 # Initiating the loop
 val <- c(3,5,10,15,20,25)
 for (i in val){ 
-  knn_model <-  knn(train = train_binary, test=test_binary,
-                    cl= train_binary_labels, k=i)
-  # make "predictions" with knn model
-  predtrn = predict(knn_model, test_binary, type = "class")
-  # Confusion matrix
-  confusionMatrix(predtrn, test_binary$default)
+  knn_model <-  knn(train_binary[,c("x","y")], test_binary[,c("x", "y")], cl = train_binary$label, k = i)
+  
+
 
 }
 ```
